@@ -57,4 +57,7 @@ export class UserEntity {
 
 	@Column({ name: 'avatar_path', default: '/uploads/user.png' })
 	avatarPath: string
+
+	@Column({ type: 'float', default: 0 })
+	balance: number
 }
