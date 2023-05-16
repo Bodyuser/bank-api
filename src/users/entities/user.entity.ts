@@ -5,8 +5,11 @@ import {
 	CreateDateColumn,
 	UpdateDateColumn,
 	Generated,
+	OneToOne,
+	JoinColumn,
 } from 'typeorm'
 import { UserRole } from '../enums/UserRole.enum'
+import { CardEntity } from '@/cards/entities/card.entity'
 
 @Entity('users')
 export class UserEntity {
@@ -58,6 +61,11 @@ export class UserEntity {
 	@Column({ name: 'avatar_path', default: '/uploads/user.png' })
 	avatarPath: string
 
-	@Column({ type: 'float', default: 0 })
-	balance: number
+	@OneToOne(() => CardEntity, card => card.id, {
+		cascade: true,
+		onDelete: 'CASCADE',
+		onUpdate: 'CASCADE',
+	})
+	@JoinColumn()
+	card: CardEntity
 }

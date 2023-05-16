@@ -17,6 +17,8 @@ import { returnProfile } from '@/utils/ReturnProfile'
 import { generateCode } from '@/utils/GenerateCode'
 import { generateUsername } from '@/utils/GenerateUsername'
 import { returnRelationsUserProfile } from '@/users/returnUserObject'
+import { CardsService } from '@/cards/cards.service'
+import { CardEntity } from '@/cards/entities/card.entity'
 
 @Injectable()
 export class AuthService {
@@ -24,7 +26,8 @@ export class AuthService {
 		@InjectRepository(UserEntity)
 		private userRepository: Repository<UserEntity>,
 		private jwtService: JwtService,
-		private sendMailService: SendMailService
+		private sendMailService: SendMailService,
+		private cardsService: CardsService
 	) {}
 
 	async login(loginDto: LoginDto) {
@@ -51,9 +54,14 @@ export class AuthService {
 			username: generateUsername(registerDto.name, registerDto.email),
 			password: await hash(registerDto.password, salt),
 		})
-		await this.userRepository.save(user)
 
+		await this.userRepository.save(user)
 		const tokens = await this.issueToken(user.id)
+
+		const card = await this.cardsService.createCard(user.id)
+		user.card = card
+
+		await this.userRepository.save(user)
 
 		await this.sendMailService.sendMail(
 			user.email,
@@ -65,9 +73,13 @@ export class AuthService {
                 <a href='${process.env.APP_URL}/profile/activate/${user.activateLink}'>Click here</a>
                 `
 		)
+		const { user: userCard, ...restCard } = user.card
 
 		return {
-			user: returnProfile(user),
+			user: returnProfile({
+				...user,
+				card: restCard as CardEntity,
+			}),
 			tokens,
 		}
 	}

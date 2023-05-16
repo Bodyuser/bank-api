@@ -8,10 +8,14 @@ import { AuthService } from '@/auth/auth.service'
 import { SendMailService } from '@/send-mail/send-mail.service'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, ILike } from 'typeorm'
-import { returnUserProfile } from './returnUserObject'
+import {
+	returnRelationsUserProfile,
+	returnUserProfile,
+} from './returnUserObject'
 import { UpdateProfileDto } from './dtos/UpdateProfile.dto'
 import { generateCode } from '@/utils/GenerateCode'
 import { compare, genSalt, hash } from 'bcryptjs'
+import { returnProfile } from '@/utils/ReturnProfile'
 
 @Injectable()
 export class UsersService {
@@ -42,7 +46,7 @@ export class UsersService {
 	async updateProfile(username: string, updateProfileDto: UpdateProfileDto) {
 		const user = await this.userRepository.findOne({
 			where: { username },
-			...returnUserProfile,
+			relations: returnRelationsUserProfile,
 		})
 		if (!user)
 			throw new UnauthorizedException('User not found or you are not logged in')
@@ -120,7 +124,7 @@ export class UsersService {
 		}
 
 		return {
-			user,
+			user: returnProfile(user),
 		}
 	}
 

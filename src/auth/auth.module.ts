@@ -8,6 +8,7 @@ import { connectJWT } from '@/configs/connectJWT.config'
 import { JwtStrategy } from '@/strategies/jwt.strategy'
 import { UserEntity } from '@/users/entities/user.entity'
 import { SendMailModule } from '@/send-mail/send-mail.module'
+import { CardsModule } from '@/cards/cards.module'
 
 @Module({
 	controllers: [AuthController],
@@ -21,6 +22,7 @@ import { SendMailModule } from '@/send-mail/send-mail.module'
 			useFactory: connectJWT,
 		}),
 		SendMailModule,
+		CardsModule,
 	],
 	exports: [AuthService],
 })

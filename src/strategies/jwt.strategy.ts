@@ -1,4 +1,5 @@
 import { UserEntity } from '@/users/entities/user.entity'
+import { returnUserProfile } from '@/users/returnUserObject'
 import { ConfigService } from '@nestjs/config'
 import { PassportStrategy } from '@nestjs/passport'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -18,6 +19,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 	}
 
 	async validate({ id }: UserEntity) {
-		return await this.userRepository.findOne({ where: { id } })
+		return await this.userRepository.findOne({
+			where: { id },
+			...returnUserProfile,
+		})
 	}
 }

@@ -12,5 +12,6 @@ export const returnProfile = (user: UserEntity) => {
 		avatarPath: user.avatarPath,
 		updatedAt: user.updatedAt,
 		online: user.online,
+		card: user.card,
 	}
 }

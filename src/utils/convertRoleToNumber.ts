@@ -1,6 +1,6 @@
 import { UserRole } from '@/users/enums/UserRole.enum'
 
-export const convertRoleToNumber = (userRole: UserRole) => {
+export const convertRole = (userRole: UserRole) => {
 	return userRole === UserRole.OWNER
 		? 3
 		: userRole === UserRole.ADMIN

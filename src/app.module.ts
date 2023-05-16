@@ -8,6 +8,8 @@ import { AuthModule } from './auth/auth.module'
 import { UsersModule } from './users/users.module'
 import { SendMailModule } from './send-mail/send-mail.module'
 import { connectNodeMailer } from './configs/connectNodeMailer.config'
+import { CardsModule } from './cards/cards.module';
+import { TransactionsModule } from './transactions/transactions.module';
 
 @Module({
 	imports: [
@@ -25,6 +27,8 @@ import { connectNodeMailer } from './configs/connectNodeMailer.config'
 		AuthModule,
 		UsersModule,
 		SendMailModule,
+		CardsModule,
+		TransactionsModule,
 	],
 })
 export class AppModule {}

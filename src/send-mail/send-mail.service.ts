@@ -30,9 +30,9 @@ export class SendMailService {
 
 		return await this.sendMail(
 			sendMailDto.email,
-			'Reset password',
-			`You give this send for reset password<br><br>
-            <a href='${process.env.APP_URL}/auth/reset/${user.resetLink}'>Click here</a>
+			'Enter code',
+			`You give this send for enter code<br><br>
+           <b>${user.code}</b>
             `
 		)
 	}

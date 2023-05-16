@@ -1,5 +1,5 @@
 import { UserEntity } from '@/users/entities/user.entity'
-import { ConvertRoleToNumber } from '@/utils/convertRoleToNumber'
+import { convertRole } from '@/utils/convertRoleToNumber'
 import {
 	CanActivate,
 	ExecutionContext,
@@ -23,7 +23,7 @@ export class CheckRoleGuard implements CanActivate {
 			context.getClass(),
 		])
 
-		const userRole = ConvertRoleToNumber(user.role)
+		const userRole = convertRole(user.role)
 
 		if (userRole >= role) {
 			return true

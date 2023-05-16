@@ -36,7 +36,9 @@ export const returnGlobalUserObject:
 
 export const returnRelationsUserProfile:
 	| FindOptionsRelationByString
-	| FindOptionsRelations<UserEntity> = {}
+	| FindOptionsRelations<UserEntity> = {
+	card: true,
+}
 
 export const returnRelationsGlobalUser:
 	| FindOptionsRelationByString
