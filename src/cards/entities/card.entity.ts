@@ -1,3 +1,4 @@
+import { TransactionEntity } from '@/transactions/entities/transaction.entity'
 import { UserEntity } from '@/users/entities/user.entity'
 import {
 	Entity,
@@ -7,9 +8,10 @@ import {
 	UpdateDateColumn,
 	OneToOne,
 	JoinColumn,
+	OneToMany,
 } from 'typeorm'
 
-@Entity('cards')
+@Entity('cards-db')
 export class CardEntity {
 	@PrimaryGeneratedColumn()
 	id: number
@@ -35,4 +37,10 @@ export class CardEntity {
 	@OneToOne(() => UserEntity, user => user.id)
 	@JoinColumn()
 	user: UserEntity
+
+	@OneToMany(() => TransactionEntity, transactions => transactions.toCard)
+	toTransactions: TransactionEntity[]
+
+	@OneToMany(() => TransactionEntity, transactions => transactions.fromCard)
+	fromTransactions: TransactionEntity[]
 }

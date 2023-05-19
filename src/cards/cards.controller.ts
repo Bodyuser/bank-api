@@ -25,4 +25,10 @@ export class CardsController {
 	) {
 		return await this.cardsService.transferMoney(card.number, transferMoneyDto)
 	}
+
+	@Auth()
+	@Get()
+	async getCard(@User('card') card: CardEntity) {
+		return await this.cardsService.getCard(card.id)
+	}
 }

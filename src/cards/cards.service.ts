@@ -5,17 +5,17 @@ import { CardEntity } from './entities/card.entity'
 import { generateCode } from '@/utils/GenerateCode'
 import { UserEntity } from '@/users/entities/user.entity'
 import { TransferMoneyDto } from './dtos/transferMoney.dto'
-import {
-	returnRelationsUserProfile,
-	returnUserProfileObject,
-} from '@/users/returnUserObject'
+import { TransactionsService } from '@/transactions/transactions.service'
+import { returnUserProfileObject } from '@/users/returnUserObject'
 
 @Injectable()
 export class CardsService {
 	constructor(
 		@InjectRepository(CardEntity)
 		private cardRepository: Repository<CardEntity>,
-		@InjectRepository(UserEntity) private userRepository: Repository<UserEntity>
+		@InjectRepository(UserEntity)
+		private userRepository: Repository<UserEntity>,
+		private transactionService: TransactionsService
 	) {}
 	async createCard(id: number) {
 		const user = await this.userRepository.findOne({
@@ -42,6 +42,8 @@ export class CardsService {
 			},
 			relations: {
 				user: true,
+				fromTransactions: true,
+				toTransactions: true,
 			},
 			// select: {
 			// 	user: returnUserProfileObject,
@@ -54,18 +56,60 @@ export class CardsService {
 			where: {
 				number: transferMoneyDto.number,
 			},
+			relations: {
+				user: true,
+				fromTransactions: true,
+				toTransactions: true,
+			},
 		})
 
-		if (!card) throw new BadRequestException('Transfer card not found')
+		if (!transferCard) throw new BadRequestException('Transfer card not found')
 
 		if (card.balance > transferMoneyDto.money) {
 			card.balance = card.balance - transferMoneyDto.money
 			transferCard.balance = transferCard.balance + transferMoneyDto.money
+			const fromTransaction = await this.transactionService.create(
+				'from',
+				card.id,
+				transferCard.id,
+				transferMoneyDto.money
+			)
+			const toTransaction = await this.transactionService.create(
+				'to',
+				card.id,
+				transferCard.id,
+				transferMoneyDto.money
+			)
+			card.fromTransactions = [...card.fromTransactions, fromTransaction]
+			transferCard.toTransactions = [
+				...transferCard.toTransactions,
+				toTransaction,
+			]
 		} else {
 			throw new BadRequestException("You don't have a this money on balance")
 		}
+
 		await this.cardRepository.save(card)
 		await this.cardRepository.save(transferCard)
+
+		return card
+	}
+
+	async getCard(id: number) {
+		const card = await this.cardRepository.findOne({
+			where: { id },
+			relations: {
+				fromTransactions: true,
+				toTransactions: true,
+				user: true,
+			},
+			select: {
+				// @ts-ignore
+				user: returnUserProfileObject,
+			},
+		})
+
+		if (!card) throw new BadRequestException('Card not found')
 
 		return card
 	}

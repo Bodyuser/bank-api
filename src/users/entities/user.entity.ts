@@ -11,7 +11,7 @@ import {
 import { UserRole } from '../enums/UserRole.enum'
 import { CardEntity } from '@/cards/entities/card.entity'
 
-@Entity('users')
+@Entity('users-db')
 export class UserEntity {
 	@PrimaryGeneratedColumn()
 	id: number
@@ -61,11 +61,7 @@ export class UserEntity {
 	@Column({ name: 'avatar_path', default: '/uploads/user.png' })
 	avatarPath: string
 
-	@OneToOne(() => CardEntity, card => card.id, {
-		cascade: true,
-		onDelete: 'CASCADE',
-		onUpdate: 'CASCADE',
-	})
+	@OneToOne(() => CardEntity, card => card.id)
 	@JoinColumn()
 	card: CardEntity
 }

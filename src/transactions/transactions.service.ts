@@ -1,26 +1,90 @@
-import { Injectable } from '@nestjs/common';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { UpdateTransactionDto } from './dto/update-transaction.dto';
-
+import { BadRequestException, Injectable } from '@nestjs/common'
+import { Repository } from 'typeorm'
+import { InjectRepository } from '@nestjs/typeorm'
+import { TransactionEntity } from './entities/transaction.entity'
+import { generateCode } from '@/utils/GenerateCode'
+import { CardEntity } from '@/cards/entities/card.entity'
+import { SortTransactionsEnum } from './enums/sortTransactions.enum'
 @Injectable()
 export class TransactionsService {
-  create(createTransactionDto: CreateTransactionDto) {
-    return 'This action adds a new transaction';
-  }
+	constructor(
+		@InjectRepository(TransactionEntity)
+		private transactionRepository: Repository<TransactionEntity>,
+		@InjectRepository(CardEntity) private cardRepository: Repository<CardEntity>
+	) {}
 
-  findAll() {
-    return `This action returns all transactions`;
-  }
+	async create(
+		type: 'from' | 'to',
+		fromId: number,
+		toId: number,
+		money: number
+	) {
+		const toCard = await this.cardRepository.findOne({
+			where: {
+				id: toId,
+			},
+		})
 
-  findOne(id: number) {
-    return `This action returns a #${id} transaction`;
-  }
+		if (!toCard) throw new BadRequestException('To card not found')
 
-  update(id: number, updateTransactionDto: UpdateTransactionDto) {
-    return `This action updates a #${id} transaction`;
-  }
+		const fromCard = await this.cardRepository.findOne({
+			where: {
+				id: fromId,
+			},
+		})
 
-  remove(id: number) {
-    return `This action removes a #${id} transaction`;
-  }
+		if (!fromCard) throw new BadRequestException('From card not found')
+
+		const transaction = await this.transactionRepository.create({
+			number: `${generateCode(10)}`,
+			type,
+			toCard,
+			fromCard,
+			money,
+		})
+
+		console.log(fromCard)
+
+		await this.transactionRepository.save(transaction)
+		return transaction
+	}
+
+	async getTransactions(cardId: number, sort: SortTransactionsEnum) {
+		let where = {}
+		if (sort === SortTransactionsEnum.ALL) {
+			where = [
+				{
+					fromCard: {
+						id: cardId,
+					},
+				},
+				{
+					toCard: {
+						id: cardId,
+					},
+				},
+			]
+		} else if (sort === SortTransactionsEnum.FROM) {
+			where = {
+				fromCard: {
+					id: cardId,
+				},
+			}
+		} else {
+			where = {
+				toCard: {
+					id: cardId,
+				},
+			}
+		}
+		const transactions = await this.transactionRepository.find({
+			relations: {
+				fromCard: true,
+				toCard: true,
+			},
+			where,
+		})
+
+		return transactions
+	}
 }
